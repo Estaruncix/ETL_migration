@@ -1,9 +1,9 @@
-# Multi-Source ETL Migration & Validation — Northwind Edition
+# Multi-Source ETL Migration & Validation; Northwind Edition
 
 A hands-on ETL migration project simulating a legacy-to-modern-warehouse
 migration: real Northwind CSV extracts are loaded into Snowflake, deliberately
 seeded with common real-world data-quality problems, and then caught, resolved,
-and documented end-to-end — the same style of migration/validation work run on
+and documented end-to-end the same style of migration/validation work run on
 commercial BI projects (orders, customers, products, referential integrity,
 row-count reconciliation).
 
@@ -14,51 +14,46 @@ row-count reconciliation).
 1. [Project Overview](#project-overview)
 2. [Methodology](#methodology)
 3. [Schema & Key Mapping](#schema--key-mapping)
-4. [Scope Decision: `employee_id`](#scope-decision-employee_id)
-5. [The Deliberate-Error Approach](#the-deliberate-error-approach)
-6. [Data-Quality Findings & Resolutions](#data-quality-findings--resolutions)
-7. [Repository Structure](#repository-structure)
-8. [How to Reproduce](#how-to-reproduce)
-9. [Results Summary](#results-summary)
-10. [Screenshots](#screenshots)
+4. [The Deliberate-Error Approach](#the-deliberate-error-approach)
+5. [Data-Quality Findings & Resolutions](#data-quality-findings--resolutions)
+6. [Repository Structure](#repository-structure)
+7. [Results Summary](#results-summary)
+8. [Screenshots](#screenshots)
 
 ---
 
 ## Project Overview
 
 This project migrates six Northwind tables — `customers`, `orders`,
-`order_details`, `products`, `suppliers`, `categories` — from flat CSV
+`order_details`, `products`, `suppliers`, `categories` from flat CSV
 extracts into a Snowflake warehouse, through a staging → curated layer
 pattern. Along the way, targeted, known data-quality issues were introduced
 into a copy of the real data, then caught by a validation suite and resolved
 using an auditable, no-silent-deletion approach (correct / quarantine / flag).
 
-**Why this project exists:** to demonstrate a realistic ETL/data-quality
-workflow end-to-end — schema mapping, staging, transformation, validation,
-issue triage, and stakeholder reporting — using a dataset structured enough
-to have meaningful relational integrity (Northwind), rather than a toy
-flat file.
+**Project Goals:** to demonstrate a realistic ETL/data-quality
+workflow end-to-end schema mapping, staging, transformation, validation,
+issue triage, and stakeholder reporting using a dataset structured enough
+to have meaningful relational integrity (Northwind), rather than a fully synthethic flat file.
 
 ---
 
 ## Methodology
 
-| Step | What | Status |
-|---|---|---|
-| 1 | Schema mapping & data audit — entities, PKs/FKs, catalog of planned issues | ✅ |
-| 2 | Source data preparation — real Northwind CSVs + targeted error injection | ✅ |
-| 3 | Snowflake environment setup — staging layer, all 6 tables loaded as-is | ✅ |
-| 4 | SQL migration/transformation — typed curated layer, then cleanup logic (flags, reject tables, dedup, surrogate key) | ✅ |
-| 5 | Data quality validation queries — referential integrity, business rules, duplicates, completeness | ✅ |
-| 6 | Issue/discrepancy log — root cause + resolution per finding | ✅ |
-| 7 | Excel reconciliation summary — stakeholder-facing pass/fail by table | ✅ |
-| 8 | Documentation & packaging — this README, screenshots, GitHub push | ✅ |
+| Step | What |
+|---|---|
+| 1 | Schema mapping & data audit: entities, PKs/FKs, catalog of planned issues |
+| 2 | Source data preparation: real Northwind CSVs + targeted error injection |
+| 3 | Snowflake environment setup: staging layer, all 6 tables loaded as-is |
+| 4 | SQL migration/transformation: typed curated layer, then cleanup logic (flags, reject tables, dedup, surrogate key) |
+| 5 | Data quality validation queries: referential integrity, business rules, duplicates, completeness |
+| 6 | Issue/discrepancy log: root cause + resolution per finding |
+| 7 | Excel reconciliation summary: stakeholder-facing pass/fail by table |
+| 8 | Documentation & packaging: this README, screenshots, GitHub push |
 
 A deliberate design choice: **validation ran first, against a type-cast but
 otherwise unmodified curated layer**, and the results of that validation
-directly drove what the final cleanup SQL needed to do. That's the same
-order of operations a real migration should follow — you don't write cleanup
-logic speculatively, you let the validation findings define the spec.
+directly drove what the final cleanup SQL needed to do.
 
 ---
 
@@ -66,29 +61,12 @@ logic speculatively, you let the validation findings define the spec.
 
 | Table | Primary Key | Foreign Keys | Notes |
 |---|---|---|---|
-| `customers` | `customer_id` | — | Referenced by `orders.customer_id` |
-| `orders` | `order_id` | `customer_id` → `customers` | `employee_id` present in source but out of scope — see below |
-| `order_details` | *(composite: `order_id` + `product_id`)* | `order_id` → `orders`, `product_id` → `products` | No natural single-column PK — surrogate key added in curated layer |
+| `customers` | `customer_id` | | Referenced by `orders.customer_id` |
+| `orders` | `order_id` | `customer_id` → `customers` |  |
+| `order_details` | *(composite: `order_id` + `product_id`)* | `order_id` → `orders`, `product_id` → `products` | No natural single-column PK surrogate key added in curated layer |
 | `products` | `product_id` | `supplier_id` → `suppliers`, `category_id` → `categories` | |
 | `suppliers` | `supplier_id` | — | Referenced by `products.supplier_id` |
 | `categories` | `category_id` | — | Referenced by `products.category_id` |
-
----
-
-## Scope Decision: `employee_id`
-
-*(TODO: replace this paragraph with your actual Step 1 note — the exact
-reasoning behind why `employees` was excluded from this migration's scope,
-e.g. staff/HR data being out of scope for a commercial-BI-flavored exercise,
-or a deliberate choice to keep the entity count focused on the
-order-fulfillment core of the schema. Documenting the decision, not just
-silently dropping the table, is the point — this section is a placeholder
-for that reasoning in your own words.)*
-
-`orders.employee_id` exists in the source data but the `employees` table
-itself was intentionally excluded from this migration's scope. This was a
-documented decision (see Step 1 notes), not an oversight — the migration
-focuses on the customer/order/product fulfillment core of the schema.
 
 ---
 
@@ -128,16 +106,16 @@ stakeholder-facing version in
 
 - **7/7 injected issues** were caught by the validation suite with exact
   row-count matches, and resolved using one of three approaches:
-  **Correct** (fixed in place — e.g. the negative price), **Quarantine**
+  **Correct** (fixed in place such as the negative price), **Quarantine**
   (moved to a `*_reject` table, excluded from curated but fully
-  recoverable — e.g. both orphaned-FK cases and the negative quantity),
+  recoverable such as both orphaned-FK cases and the negative quantity),
   or **Flag for manual review** (kept in curated, marked with a boolean
-  column — e.g. the future-dated orders and missing company names).
+  column such as the future-dated orders and missing company names).
 - No row was ever silently deleted. Every excluded row has a corresponding
   entry in a reject table.
 - The validation suite also caught **naturally-occurring gaps in the real
   data** (missing `region`/`fax`/`shipped_date`) that were reviewed and
-  confirmed to be normal, pre-existing sparsity — not migration defects.
+  confirmed to be normal, pre-existing sparsity not migration defects.
 
 ---
 
@@ -161,20 +139,6 @@ stakeholder-facing version in
 ├── reconciliation_summary.xlsx
 └── README.md
 ```
-
----
-
-## How to Reproduce
-
-1. Create a free Snowflake trial account (no credit card required).
-2. Create a database and schema (`NORTHWIND_DB.STAGING`, `NORTHWIND_DB.CURATED`).
-3. Load `data/migrated/*.csv` into staging tables mirroring the CSV structure exactly.
-4. Run `sql/curated/step4_curated_cleanup.sql` to build the typed + cleaned curated layer.
-5. Run `validation/validation_queries.sql` against curated to reproduce the findings above.
-6. Run `sql/curated/step4b_post_cleanup_validation.sql` to reconcile row counts post-cleanup.
-7. Open `reconciliation_summary.xlsx` for the business-facing pass/fail view.
-
----
 
 ## Results Summary
 
