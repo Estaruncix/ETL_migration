@@ -127,13 +127,12 @@ stakeholder-facing version in
 ├── sql/
 │   ├── staging/                    # staging table DDL / load scripts
 │   └── curated/
-│       ├── step4_curated_cleanup.sql
-│       └── step4b_post_cleanup_validation.sql
+│       └── step4_curated_cleanup.sql
 ├── validation/
 │   └── validation_queries.sql      # the full validation query suite
-├── docs/
-│   ├── schema_reference.md
-│   ├── ISSUE_LOG.md
+│
+├── schema_reference.md
+├── ISSUE_LOG.md
 ├── reconciliation_summary.xlsx
 └── README.md
 ```
