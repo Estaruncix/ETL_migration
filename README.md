@@ -134,7 +134,6 @@ stakeholder-facing version in
 ├── docs/
 │   ├── schema_reference.md
 │   ├── ISSUE_LOG.md
-│   └── screenshots/
 ├── reconciliation_summary.xlsx
 └── README.md
 ```
