@@ -18,13 +18,12 @@ row-count reconciliation).
 5. [Data-Quality Findings & Resolutions](#data-quality-findings--resolutions)
 6. [Repository Structure](#repository-structure)
 7. [Results Summary](#results-summary)
-8. [Screenshots](#screenshots)
 
 ---
 
 ## Project Overview
 
-This project migrates six Northwind tables — `customers`, `orders`,
+This project migrates six Northwind tables; `customers`, `orders`,
 `order_details`, `products`, `suppliers`, `categories` from flat CSV
 extracts into a Snowflake warehouse, through a staging → curated layer
 pattern. Along the way, targeted, known data-quality issues were introduced
@@ -153,16 +152,3 @@ stakeholder-facing version in
 | **Total** | **3,192** | **3** | **4** | **3,187** | |
 
 ---
-
-## Screenshots
-
-*(TODO: add screenshots of the Snowflake worksheet results — staging load
-confirmation, the `VALIDATION_RESULTS` table output, and the post-cleanup
-reconciliation query results — to `docs/screenshots/` and reference them
-here, e.g.)*
-
-```
-![Staging load confirmation](docs/screenshots/staging_load.png)
-![Validation results](docs/screenshots/validation_results.png)
-![Post-cleanup reconciliation](docs/screenshots/post_cleanup_reconciliation.png)
-```
