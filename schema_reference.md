@@ -1,7 +1,7 @@
 # Schema & Key Reference
 
 **Project:** Multi-Source ETL Migration & Validation — Northwind Edition
-**Stage:** Step 1 — Schema mapping & data audit
+**Stage:** Step 1; Schema mapping & data audit
 
 ---
 
@@ -33,7 +33,7 @@ Six tables from the Northwind dataset are in scope for this migration:
 | Table | Primary Key | Foreign Keys | Notes |
 |---|---|---|---|
 | `customers` | `customer_id` | — | Referenced by `orders.customer_id` |
-| `orders` | `order_id` | `customer_id` → `customers` | `employee_id` present in source but out of scope — see [Scope Decision](#scope-decision-employee_id) below |
+| `orders` | `order_id` | `customer_id` → `customers` |  |
 | `order_details` | *(composite: `order_id` + `product_id`)* | `order_id` → `orders`, `product_id` → `products` | No natural single-column PK in the source; a surrogate key (`order_detail_id`) is generated in the curated layer |
 | `products` | `product_id` | `supplier_id` → `suppliers`, `category_id` → `categories` | |
 | `suppliers` | `supplier_id` | — | Referenced by `products.supplier_id` |
@@ -49,30 +49,6 @@ customers ──< orders ──< order_details >── products >── supplier
 - One customer can place many orders.
 - One order can contain many order_details (line items).
 - One product can appear in many order_details, belongs to one supplier and one category.
-
----
-
-## Scope Decision: `employee_id`
-
-`orders.employee_id` exists in the source data, but the `employees` table
-itself is **intentionally excluded** from this migration's scope. This is a
-documented decision, not an oversight.
-
-**Rationale:** this project focuses on the customer/order/product
-fulfillment core of the Northwind schema — the entities that map most
-naturally onto a commercial BI/data-warehouse migration (customers placing
-orders for products). `employees` represents internal HR/staffing data,
-which is a different domain with different sensitivity and governance
-considerations, and doesn't add meaningfully to the referential-integrity
-and business-rule validation goals this project is testing. Rather than
-silently dropping the table or leaving `employee_id` unexplained, it's
-called out here: `orders.employee_id` is retained as a column in the
-staging/curated layers, but has no corresponding `employees` table in this
-migration, and no FK validation is run against it.
-
-*(If your original reasoning was different from this — e.g. a data-privacy
-constraint, a deliberate reduction in entity count for scope/time reasons,
-or something else — replace this paragraph with your actual note.)*
 
 ---
 
@@ -95,7 +71,7 @@ actually proves something rather than just running clean by default.
 
 Full results of the validation suite run against these planted issues, plus
 the naturally-occurring findings surfaced along the way (missing
-region/fax/shipped_date — inherent to the real dataset, not injected), are
+region/fax/shipped_date inherent to the real dataset, not injected), are
 documented in [`ISSUE_LOG.md`](ISSUE_LOG.md).
 
 ---
