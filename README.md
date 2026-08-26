@@ -127,7 +127,7 @@ stakeholder-facing version in
 ├── sql/
 │   ├── staging/                    # staging table DDL / load scripts
 │   └── curated/
-│       └── step4_curated_cleanup.sql
+│       └── 15_curated_cleanup.sql
 ├── validation/
 │   └── validation_queries.sql      # the full validation query suite
 │
